@@ -1,0 +1,299 @@
+{
+  "version": "GitHub Pages V4",
+  "checks": 72,
+  "passed": 72,
+  "public_deployment": false,
+  "whatsapp_messages_sent": 0,
+  "test_method": "HTML loaded into Chromium using set_content. Browser policy blocks direct file navigation. Live GitHub Pages deployment and real WhatsApp delivery not tested. WhatsApp window openings intercepted locally. Clipboard fallback return was stubbed for branch coverage; actual clipboard writes were not verified.",
+  "results": [
+    {
+      "name": "Script initialisation",
+      "passed": true
+    },
+    {
+      "name": "27 original animated connection paths",
+      "passed": true
+    },
+    {
+      "name": "Animation frame progression",
+      "passed": true
+    },
+    {
+      "name": "12 industry tabs",
+      "passed": true
+    },
+    {
+      "name": "Chinese hero unchanged",
+      "passed": true
+    },
+    {
+      "name": "No horizontal overflow / desktop",
+      "passed": true
+    },
+    {
+      "name": "Homepage pixels identical at fixed animation time",
+      "passed": true
+    },
+    {
+      "name": "Incomplete form blocked",
+      "passed": true
+    },
+    {
+      "name": "Preview does not open WhatsApp",
+      "passed": true
+    },
+    {
+      "name": "Preview shown",
+      "passed": true
+    },
+    {
+      "name": "Primary submit opens one WhatsApp draft",
+      "passed": true
+    },
+    {
+      "name": "Correct sales destination",
+      "passed": true
+    },
+    {
+      "name": "All entered text included intact",
+      "passed": true
+    },
+    {
+      "name": "Industry / system / consent / source / language included",
+      "passed": true
+    },
+    {
+      "name": "No false delivered confirmation",
+      "passed": true
+    },
+    {
+      "name": "Form data retained after opening",
+      "passed": true
+    },
+    {
+      "name": "Window opener isolated",
+      "passed": true
+    },
+    {
+      "name": "Captured WhatsApp draft equals preview",
+      "passed": true
+    },
+    {
+      "name": "Consent required before opening",
+      "passed": true
+    },
+    {
+      "name": "Fallback link removed without valid consent",
+      "passed": true
+    },
+    {
+      "name": "Invalid phone rejected",
+      "passed": true
+    },
+    {
+      "name": "Whitespace-only identity rejected",
+      "passed": true
+    },
+    {
+      "name": "Optional omissions labelled",
+      "passed": true
+    },
+    {
+      "name": "English language switch",
+      "passed": true
+    },
+    {
+      "name": "English preview, original Chinese requirements retained",
+      "passed": true
+    },
+    {
+      "name": "English industry label",
+      "passed": true
+    },
+    {
+      "name": "zh: accounting industry flow renders",
+      "passed": true
+    },
+    {
+      "name": "zh: logistics industry flow renders",
+      "passed": true
+    },
+    {
+      "name": "zh: wholesale industry flow renders",
+      "passed": true
+    },
+    {
+      "name": "zh: retail industry flow renders",
+      "passed": true
+    },
+    {
+      "name": "zh: fnb industry flow renders",
+      "passed": true
+    },
+    {
+      "name": "zh: manufacturing industry flow renders",
+      "passed": true
+    },
+    {
+      "name": "zh: services industry flow renders",
+      "passed": true
+    },
+    {
+      "name": "zh: ecommerce industry flow renders",
+      "passed": true
+    },
+    {
+      "name": "zh: construction industry flow renders",
+      "passed": true
+    },
+    {
+      "name": "zh: property industry flow renders",
+      "passed": true
+    },
+    {
+      "name": "zh: automotive industry flow renders",
+      "passed": true
+    },
+    {
+      "name": "zh: education industry flow renders",
+      "passed": true
+    },
+    {
+      "name": "en: accounting industry flow renders",
+      "passed": true
+    },
+    {
+      "name": "en: logistics industry flow renders",
+      "passed": true
+    },
+    {
+      "name": "en: wholesale industry flow renders",
+      "passed": true
+    },
+    {
+      "name": "en: retail industry flow renders",
+      "passed": true
+    },
+    {
+      "name": "en: fnb industry flow renders",
+      "passed": true
+    },
+    {
+      "name": "en: manufacturing industry flow renders",
+      "passed": true
+    },
+    {
+      "name": "en: services industry flow renders",
+      "passed": true
+    },
+    {
+      "name": "en: ecommerce industry flow renders",
+      "passed": true
+    },
+    {
+      "name": "en: construction industry flow renders",
+      "passed": true
+    },
+    {
+      "name": "en: property industry flow renders",
+      "passed": true
+    },
+    {
+      "name": "en: automotive industry flow renders",
+      "passed": true
+    },
+    {
+      "name": "en: education industry flow renders",
+      "passed": true
+    },
+    {
+      "name": "Industry copied into form",
+      "passed": true
+    },
+    {
+      "name": "Custom requirements not overwritten",
+      "passed": true
+    },
+    {
+      "name": "Long message fully encoded",
+      "passed": true
+    },
+    {
+      "name": "Long-message fallback displayed",
+      "passed": true
+    },
+    {
+      "name": "Plain-chat fallback correct",
+      "passed": true
+    },
+    {
+      "name": "User text not rendered as HTML",
+      "passed": true
+    },
+    {
+      "name": "Special characters preserved",
+      "passed": true
+    },
+    {
+      "name": "Copy fallback selectable and working",
+      "passed": true
+    },
+    {
+      "name": "Cinematic mode toggle retained",
+      "passed": true
+    },
+    {
+      "name": "Pause control retained",
+      "passed": true
+    },
+    {
+      "name": "No backend POST request",
+      "passed": true
+    },
+    {
+      "name": "No browser errors",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "No external resource requests",
+      "passed": true
+    },
+    {
+      "name": "Mobile form and preview fit",
+      "passed": true
+    },
+    {
+      "name": "English mobile form fits",
+      "passed": true
+    },
+    {
+      "name": "Reduced-motion preference retained",
+      "passed": true
+    },
+    {
+      "name": "Self-contained: no external scripts",
+      "passed": true
+    },
+    {
+      "name": "Self-contained: all images embedded",
+      "passed": true
+    },
+    {
+      "name": "Static only: no form server action",
+      "passed": true
+    },
+    {
+      "name": "CSP prevents accidental form submissions",
+      "passed": true
+    },
+    {
+      "name": "Old-host metadata removed",
+      "passed": true
+    },
+    {
+      "name": "Original animation JS byte-equivalent",
+      "passed": true
+    }
+  ]
+}
