@@ -80,6 +80,16 @@
 @media(max-width:760px){.demo-section{padding-block:72px}.demo-copy h2{font-size:38px;line-height:1.35}.demo-copy>p:not(.eyebrow):not(.demo-disclaimer){font-size:15px;line-height:1.9}.demo-selectors{grid-template-columns:1fr 1fr;gap:9px}.demo-selector{font-size:14px;padding:13px 12px;min-height:52px}.demo-copy>.btn{font-size:16px;padding:15px 20px}.demo-copy .demo-disclaimer{font-size:10px}.terminal{min-height:0}.terminal-bar{padding:16px 15px}.terminal-bar .mono{font-size:9px}.terminal-body{padding:22px 17px}.terminal-prompt{font-size:16px;padding:15px}.demo-log{font-size:13px;gap:13px}.demo-result{font-size:15px;padding:16px}.report-head{align-items:flex-start;flex-direction:column}.report-head h3{font-size:22px}.report-head p{text-align:left;font-size:9px}.kpi-grid{grid-template-columns:1fr 1fr;gap:9px}.kpi-card{padding:14px 12px}.kpi-card small{font-size:10px}.kpi-card strong{font-size:23px}.chart-grid{grid-template-columns:1fr}.chart-card{min-height:190px;padding:15px}.chart-title strong{font-size:14px}.line-chart{height:128px}.donut-wrap{height:138px}.agent-insight h4{font-size:15px}.agent-insight p{font-size:14px}.agent-actions button{font-size:12px;padding:10px 12px}.agent-evidence{grid-template-columns:1fr 1fr}.evidence-item small{font-size:8px}.evidence-item strong{font-size:10px}.terminal-foot{font-size:9px}}
 @media(max-width:420px){.demo-selectors{grid-template-columns:1fr}.kpi-card strong{font-size:21px}.agent-evidence{grid-template-columns:1fr 1fr}.terminal-prompt{font-size:15px}}
 
+
+/* V36 iOS pinch-zoom hard fallback: preserve layout, drop GPU-heavy layers while magnified. */
+body.ios-zoom-static .neural-stage #core-canvas,
+body.ios-zoom-static .neural-stage #neural-fx{display:none!important}
+body.ios-zoom-static .neural-stage .core-halo{animation:none!important;filter:none!important;box-shadow:0 0 34px #3096fa14!important;opacity:.7}
+body.ios-zoom-static .neural-stage .orbit-label{animation:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+body.ios-zoom-static .header{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:#060b17f7}
+body.ios-zoom-static .floating-whatsapp{display:none!important}
+body.ios-zoom-static .neural-stage{contain:layout paint style}
+
 /* Responsive */
 @media(min-width:1550px){.hero-grid{min-height:770px}.core-stage{transform:translateX(16px) scale(1.04)}}
 @media(max-width:1150px){.container{width:calc(100% - 72px)}.nav-wrap{width:calc(100% - 48px);gap:18px}.desktop-nav{gap:19px}.brand-and{font-size:9px}.brand-type{font-size:16px}.brand-type small{font-size:7px;letter-spacing:1.25px}.nav-actions{gap:16px}.hero-grid{min-height:650px}.hero-copy .eyebrow{letter-spacing:1.2px;font-size:9px}h1{font-size:68px}.hero-description{font-size:14px;max-width:380px}.hero-actions .btn{font-size:12px;padding:14px 17px;gap:11px}.label-two{right:-3%;padding:12px}.orbit-label strong{font-size:9px}.core-center>span{font-size:40px}.hero-bottom{height:70px}.value-card,.deployment-card{padding:27px 24px}.industry-panel{gap:30px;padding:32px}.industry-tab{padding:12px 18px}.industry-copy h3{font-size:26px}.demo-grid{gap:45px}.inquiry-grid{gap:50px}.faq-section{gap:60px}.ecosystem-inner{gap:25px}.tool-names{gap:15px}.tool-names>span{font-size:14px}.tool-names b{font-size:22px}}
@@ -1041,6 +1051,8 @@ window.UK_CONTENT = {"translations":{"zh":{"skip":"跳到主要内容","nav.solu
   const back = canvas.getContext('2d', { alpha: true });
   const front = frontCanvas.getContext('2d', { alpha: true });
   if (!back || !front) return;
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  let iosZoomStatic = false, iosRestoreTimer = 0;
   const portrait = $('.neural-portrait');
   const modeButton = $('#energy-toggle');
   const TAU = Math.PI * 2;
@@ -1253,25 +1265,50 @@ window.UK_CONTENT = {"translations":{"zh":{"skip":"跳到主要内容","nav.solu
     raf=requestAnimationFrame(frame);
   }
   restartCanvas=()=>{
-    if(raf)cancelAnimationFrame(raf);raf=0;draw();lastFrame=performance.now();
+    if(raf)cancelAnimationFrame(raf);raf=0;
+    if(iosZoomStatic){lastFrame=performance.now();return;}
+    draw();lastFrame=performance.now();
     if(!motionPaused&&!document.hidden&&onscreen&&!frozen)raf=requestAnimationFrame(frame);
   };
   let resizeRAF=0,lastCanvasW=0,lastCanvasH=0,zoomSafe=false;
   const getZoomScale=()=>window.visualViewport?.scale||1;
+  function enterIOSZoomStatic(){
+    if(!isIOS||iosZoomStatic)return;
+    iosZoomStatic=true;zoomSafe=true;
+    document.body.classList.add('ios-zoom-static');stage.classList.add('zoom-safe');
+    if(raf)cancelAnimationFrame(raf);raf=0;
+    // Releasing the backing stores immediately is the key stability measure on iOS Safari.
+    for(const c of [canvas,frontCanvas]){c.width=1;c.height=1;}
+    lastCanvasW=lastCanvasH=0;
+  }
+  function leaveIOSZoomStatic(){
+    if(!isIOS||!iosZoomStatic)return;
+    if(getZoomScale()>1.02)return;
+    clearTimeout(iosRestoreTimer);
+    iosRestoreTimer=setTimeout(()=>{
+      if(getZoomScale()>1.02)return;
+      iosZoomStatic=false;zoomSafe=false;
+      document.body.classList.remove('ios-zoom-static');stage.classList.remove('zoom-safe');
+      resizeCanvasNow();
+    },700);
+  }
   function applyZoomSafety(){
     const scale=getZoomScale();
+    if(isIOS){
+      if(scale>1.02) enterIOSZoomStatic(); else leaveIOSZoomStatic();
+      return;
+    }
     zoomSafe=mobile && scale>1.35;
     stage.classList.toggle('zoom-safe',zoomSafe);
   }
   function resizeCanvasNow(){
     resizeRAF=0;
+    if(iosZoomStatic)return;
     const r=stage.getBoundingClientRect();w=r.width;h=r.height;if(!w||!h)return;
-    mobile=innerWidth<=760;applyZoomSafety();
-    // iOS Safari can repeatedly rebuild very large canvas backing stores during pinch/page zoom.
-    // Keep a strict pixel budget and reduce resolution while zoomed; visual size stays unchanged.
-    const baseDpr=Math.min(devicePixelRatio||1,mobile?1.35:1.8);
-    dpr=zoomSafe?Math.min(baseDpr,.85):baseDpr;
-    const maxPixels=zoomSafe?850000:(mobile?1500000:2600000);
+    mobile=innerWidth<=760;applyZoomSafety();if(iosZoomStatic)return;
+    const baseDpr=Math.min(devicePixelRatio||1,mobile?1.25:1.8);
+    dpr=zoomSafe?Math.min(baseDpr,.8):baseDpr;
+    const maxPixels=zoomSafe?700000:(mobile?1150000:2600000);
     const requested=w*h*dpr*dpr;
     if(requested>maxPixels)dpr*=Math.sqrt(maxPixels/requested);
     const cw=Math.max(1,Math.round(w*dpr)),ch=Math.max(1,Math.round(h*dpr));
@@ -1281,7 +1318,7 @@ window.UK_CONTENT = {"translations":{"zh":{"skip":"跳到主要内容","nav.solu
     sx=cw/800;sy=ch/800;portraitAspect=w/h;brain.y=220*portraitAspect;eye.y=303*portraitAspect;makePaths();restartCanvas();
   }
   function resizeCanvas(){
-    if(resizeRAF)return;
+    if(iosZoomStatic||resizeRAF)return;
     resizeRAF=requestAnimationFrame(resizeCanvasNow);
   }
   function refreshMode(){
@@ -1291,13 +1328,32 @@ window.UK_CONTENT = {"translations":{"zh":{"skip":"跳到主要内容","nav.solu
   }
   modeButton.addEventListener('click',()=>{cinematic=!cinematic;refreshMode();restartCanvas();});
   new MutationObserver(refreshMode).observe(document.documentElement,{attributes:true,attributeFilter:['data-lang']});
-  if('ResizeObserver' in window){const ro=new ResizeObserver(()=>resizeCanvas());ro.observe(stage);}else addEventListener('resize',resizeCanvas,{passive:true});
-  addEventListener('resize',resizeCanvas,{passive:true});
-  if(window.visualViewport){
-    let vvTimer=0;
-    const onViewportChange=()=>{clearTimeout(vvTimer);applyZoomSafety();resizeCanvas();vvTimer=setTimeout(()=>{applyZoomSafety();resizeCanvas();},140);};
-    visualViewport.addEventListener('resize',onViewportChange,{passive:true});
-    visualViewport.addEventListener('scroll',onViewportChange,{passive:true});
+  if(!isIOS){
+    if('ResizeObserver' in window){const ro=new ResizeObserver(()=>resizeCanvas());ro.observe(stage);}
+    addEventListener('resize',resizeCanvas,{passive:true});
+    if(window.visualViewport){
+      let vvTimer=0;
+      const onViewportChange=()=>{clearTimeout(vvTimer);applyZoomSafety();resizeCanvas();vvTimer=setTimeout(()=>{applyZoomSafety();resizeCanvas();},140);};
+      visualViewport.addEventListener('resize',onViewportChange,{passive:true});
+      visualViewport.addEventListener('scroll',onViewportChange,{passive:true});
+    }
+  }else{
+    // Pinch gestures can fire many viewport/resize events before Safari reports a stable scale.
+    // Freeze at the first multi-touch/gesture signal instead of waiting for those events.
+    const pinchStart=e=>{if((e.touches&&e.touches.length>1)||e.type==='gesturestart')enterIOSZoomStatic();};
+    addEventListener('touchstart',pinchStart,{passive:true});
+    addEventListener('touchmove',pinchStart,{passive:true});
+    addEventListener('gesturestart',pinchStart,{passive:true});
+    addEventListener('gesturechange',()=>enterIOSZoomStatic(),{passive:true});
+    const pinchEnd=()=>leaveIOSZoomStatic();
+    addEventListener('gestureend',pinchEnd,{passive:true});
+    addEventListener('touchend',pinchEnd,{passive:true});
+    addEventListener('orientationchange',()=>setTimeout(()=>{if(!iosZoomStatic)resizeCanvasNow();},350),{passive:true});
+    if(window.visualViewport){
+      const vvCheck=()=>{if(getZoomScale()>1.02)enterIOSZoomStatic();else leaveIOSZoomStatic();};
+      visualViewport.addEventListener('resize',vvCheck,{passive:true});
+      visualViewport.addEventListener('scroll',vvCheck,{passive:true});
+    }
   }
   stage.addEventListener('pointermove',e=>{if(motionPaused||e.pointerType==='touch')return;const r=stage.getBoundingClientRect();pointer.x=(e.clientX-r.left)/r.width-.5;pointer.y=(e.clientY-r.top)/r.height-.5;},{passive:true});
   stage.addEventListener('pointerleave',()=>{pointer.x=pointer.y=0;},{passive:true});
@@ -1307,7 +1363,7 @@ window.UK_CONTENT = {"translations":{"zh":{"skip":"跳到主要内容","nav.solu
   portrait.addEventListener('load',restartCanvas,{once:true});
   // Deterministic visual QA hook; it carries no user or business data.
   window.UKNeural={
-    inspect:()=>({frames,time,paused:motionPaused,cinematic,onscreen,paths:streamPaths.length,width:w,height:h,reducedMotion:motionQuery.matches}),
+    inspect:()=>({frames,time,paused:motionPaused,cinematic,onscreen,paths:streamPaths.length,width:w,height:h,reducedMotion:motionQuery.matches,isIOS,iosZoomStatic,zoomScale:getZoomScale()}),
     seek:seconds=>{frozen=true;time=Math.max(0,Number(seconds)||0);restartCanvas();},
     resume:()=>{frozen=false;restartCanvas();}
   };
@@ -1333,4 +1389,4 @@ window.UK_CONTENT = {"translations":{"zh":{"skip":"跳到主要内容","nav.solu
  function run(){try{mount();}catch(error){console.error('UK original motion failed:',error);const s=document.querySelector('.neural-stage');if(s)s.dataset.animationState='error';}}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run,{once:true});else run();
 })();
-</script></body></html>
+</script><div style="position:fixed;left:8px;bottom:8px;z-index:9999;font:7px monospace;color:#5d7894;opacity:.35;pointer-events:none">V36 · IOS SAFE ZOOM</div></body></html>
